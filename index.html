@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anny Trufas</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', cursive, sans-serif;
+      background: linear-gradient(135deg, #e6d6eb, #cbb6e3);
+      color: #3a2b2b;
+    }
+    header { text-align: center; padding: 20px; font-size: 6rem; font-weight: bold; font-family: 'Brush Script MT', cursive; text-shadow: 2px 2px 5px rgba(0,0,0,0.2);}
+    main { max-width: 750px; margin: 20px auto; padding: 20px; background: rgba(255,255,255,0.9); border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);}
+    h2 { text-align: center; margin-bottom: 15px;}
+    .sabor-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between; /* separa os itens nas extremidades */
+      background: #f8f0fa;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 10px;
+      gap: 0;
+    }
+    .sabor-item label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: unset; /* remove largura mínima para alinhar à esquerda */
+      margin: 0;
+    }
+    .sabor-item input[type="number"] {
+      width: 70px;
+      padding: 5px;
+      border: none;
+      border-radius: 5px;
+      text-align: center;
+      margin-left: 0;
+    }
+    form { display: flex; flex-direction: column; gap: 12px;}
+    input, textarea, button { padding: 12px; border: none; border-radius: 8px; font-size: 1rem; width: 100%;}
+    button { background: #6a3f8a; color: white; cursor: pointer; transition: 0.3s;}
+    button:hover { background: #8a5fb8;}
+    .social { margin-top: 20px; text-align: center;}
+    .social a { margin: 0 10px; text-decoration: none; font-weight: bold; color: #6a3f8a; transition: 0.3s;}
+    .social a:hover { color: #3a2b2b;}
+    .pedido { background: #fdf6ff; border: 1px solid #ddd; border-radius: 10px; padding: 10px; margin: 10px 0;}
+    .limpar { background: #d9534f; margin-top: 10px;}
+    .limpar:hover { background: #b52b27;}
+    #loginBtn { position: fixed; bottom: 8px; right: 8px; font-size: 0.8rem; background: transparent; color: #999; border: none; cursor: pointer;}
+    #loginArea { display: none; max-width: 700px; margin: 20px auto; padding: 15px; background: #fff; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
+  </style>
+</head>
+<body>
+  <header>Anny Trufas</header>
+
+  <main>
+    <h2>Cardápio de Sabores</h2>
+    <form id="pedidoForm">
+      <input type="text" id="nomeCliente" placeholder="Seu nome" required>
+      <div class="sabores" id="saboresContainer"></div>
+      <textarea id="endereco" placeholder="Endereço de entrega (bairro, rua, número)" required></textarea>
+      <button type="submit">Enviar Pedido</button>
+    </form>
+    <div class="social">
+      <a href="https://wa.me/5584994567207" target="_blank">WhatsApp</a>
+      <a href="https://www.instagram.com/annytrufasdlc" target="_blank">Instagram</a>
+    </div>
+  </main>
+
+  <!-- Área administrativa -->
+  <div id="loginArea">
+    <h3>📋 Painel Administrativo</h3>
+    <div id="listaPedidos"></div>
+    <button class="limpar" onclick="limparPedidos()">🗑 Limpar Histórico</button>
+    <h3>✏️ Editar Cardápio</h3>
+    <input type="text" id="novoSabor" placeholder="Novo sabor">
+    <button onclick="adicionarSabor()">Adicionar Sabor</button>
+    <ul id="listaSabores"></ul>
+  </div>
+  <button id="loginBtn" onclick="fazerLogin()">⚙️</button>
+
+  <script>
+    let precoTrufa = 2.0;
+    let senhaDono = "530530";
+
+    // Distâncias aproximadas a partir do bairro Santa Delmira
+    let distancias = {
+      "Santa Delmira": 0,
+      "Abolição 4": 5,
+      "Abolição 3": 5,
+      "Abolição 2": 8,
+      "Abolição 1": 10,
+      "abolição 5": 0,
+      "Redenção": 5,
+      "Nova Betânia": 5,
+      "Santa Júlia": 0,
+      "Parque das Rosas": 0,
+      "Integração": 0,
+      "ving rosado": 25,
+      "Rincão": 25,
+      "Presidente Costa e Silva": 25,
+      "Dix-Sept Rosado (Aeroporto)": 15,
+      "Centro": 10,
+      "Doze Anos": 10,
+      "Alto de São Manoel": 18,
+      "Belo Horizonte": 15,
+      "Ilha de Santa Luzia": 18,
+      "Paredões": 10,
+      "Alto da Conceição": 10,
+      "Santo Antônio": 10,
+      "Boa Vista": 15,
+      "Quixabeirinha": 15,
+      "Walfredo Gurgel": 25,
+      "Barrocas": 10,
+      "Sítio Cajazeiras": 10,
+    };
+
+    let sabores = ["Brigadeiro", "Limão", "Maracujá", "Morango", "Amendoim"];
+
+    function carregarSabores() {
+      let container = document.getElementById("saboresContainer");
+      container.innerHTML = "";
+      sabores.forEach(sabor => {
+        container.innerHTML += `
+  <div class="sabor-item">
+    <label><input type="checkbox" value="${sabor}"> ${sabor}</label>
+    <input type="number" min="0" placeholder="Qtd">
+  </div>`;
+      });
+      let lista = document.getElementById("listaSabores");
+      lista.innerHTML = "";
+      sabores.forEach((s, i) => {
+        lista.innerHTML += `<li>${s} <button onclick="removerSabor(${i})">❌</button></li>`;
+      });
+    }
+    carregarSabores();
+
+    function calcularTaxaEntrega(km) {
+      if (km <= 2) return 0;
+      if (km <= 10) return km * 1.0;
+      return km * 1.5;
+    }
+
+    function mostrarPedidos() {
+      let pedidos = JSON.parse(localStorage.getItem("pedidos")) || [];
+      let lista = document.getElementById("listaPedidos");
+      lista.innerHTML = "";
+      pedidos.forEach((p, idx) => {
+        div = document.createElement("div");
+        div.classList.add("pedido");
+        div.innerHTML = `
+          <strong>Pedido #${p.numeroPedido} - 👤 ${p.nome}</strong><br>
+          📦 ${p.sabores.join(", ")} <br>
+          📍 ${p.endereco} <br>
+          🚚 Frete: R$ ${p.taxaEntrega.toFixed(2)} <br>
+          💵 Total: R$ ${p.total.toFixed(2)} <br>
+          🕒 ${p.data}`;
+        lista.appendChild(div);
+      });
+    }
+
+    document.getElementById("pedidoForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      let nome = document.getElementById("nomeCliente").value;
+      let endereco = document.getElementById("endereco").value;
+      let saboresSelecionados = [];
+      let qtdTotal = 0;
+      document.querySelectorAll(".sabor-item").forEach(item => {
+        let checkbox = item.querySelector("input[type=checkbox]");
+        let qtd = parseInt(item.querySelector("input[type=number]").value) || 0;
+        if (checkbox.checked && qtd > 0) {
+          saboresSelecionados.push(`${checkbox.value} (${qtd})`);
+          qtdTotal += qtd;
+        }
+      });
+      if (saboresSelecionados.length === 0) {
+        alert("Selecione pelo menos um sabor e quantidade!");
+        return;
+      }
+      let valorProdutos = qtdTotal * precoTrufa;
+      let km = null;
+      for (let bairro in distancias) {
+        if (endereco.toLowerCase().includes(bairro.toLowerCase())) {
+          km = distancias[bairro];
+          break;
+        }
+      }
+      let taxaEntrega = 0;
+      let aviso = "";
+      if (km !== null) {
+        taxaEntrega = calcularTaxaEntrega(km);
+      } else {
+        aviso = "\n⚠️ Endereço fora da área cadastrada, confirmar frete no WhatsApp.";
+      }
+      let total = valorProdutos + taxaEntrega;
+
+      // Numeração automática do pedido
+      let ultimoNumero = parseInt(localStorage.getItem("ultimoNumeroPedido") || "0");
+      let numeroPedido = ultimoNumero + 1;
+      localStorage.setItem("ultimoNumeroPedido", numeroPedido);
+
+      let mensagem = `🍫 Novo Pedido #${numeroPedido} 🍫\n\n👤 Nome: ${nome}\n📦 Sabores:\n- ${saboresSelecionados.join("\n- ")}\n📍 Endereço: ${endereco}\n\n💰 Produtos: R$ ${valorProdutos.toFixed(2)}\n🚚 Entrega: R$ ${taxaEntrega.toFixed(2)}\n💵 Total: R$ ${total.toFixed(2)}${aviso}`;
+      let pedido = {numeroPedido, nome, sabores: saboresSelecionados, endereco, taxaEntrega, total, data: new Date().toLocaleString()};
+      let pedidos = JSON.parse(localStorage.getItem("pedidos")) || [];
+      pedidos.push(pedido);
+      localStorage.setItem("pedidos", JSON.stringify(pedidos));
+      mostrarPedidos();
+      let telefone = "5584994567207"; 
+      let urlWpp = `https://wa.me/${telefone}?text=${encodeURIComponent(mensagem)}`;
+      window.open(urlWpp, "_blank");
+    });
+
+    function limparPedidos() {
+      if (confirm("Tem certeza que deseja apagar todos os pedidos?")) {
+        localStorage.removeItem("pedidos");
+        localStorage.removeItem("ultimoNumeroPedido"); // zera a numeração
+        mostrarPedidos();
+      }
+    }
+
+    function fazerLogin() {
+      let senha = prompt("Digite a senha:");
+      if (senha === senhaDono) {
+        document.getElementById("loginArea").style.display = "block";
+        mostrarPedidos();
+      } else {
+        alert("Senha incorreta!");
+      }
+    }
+
+    function adicionarSabor() {
+      let novo = document.getElementById("novoSabor").value.trim();
+      if (novo && !sabores.includes(novo)) {
+        sabores.push(novo);
+        document.getElementById("novoSabor").value = "";
+        carregarSabores();
+      }
+    }
+    function removerSabor(i) {
+      sabores.splice(i, 1);
+      carregarSabores();
+    }
+  </script>
+</body>
+</html>
+
