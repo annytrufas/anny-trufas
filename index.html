@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anny Trufas</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', cursive, sans-serif;
+      background: linear-gradient(135deg, #e6d6eb, #cbb6e3);
+      color: #3a2b2b;
+    }
+    header {
+      text-align: center;
+      padding: 20px;
+      font-size: 6rem;
+      font-weight: bold;
+      font-family: 'Brush Script MT', cursive;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    }
+    main {
+      max-width: 750px;
+      margin: 20px auto;
+      padding: 20px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    h2 { text-align: center; margin-bottom: 15px;}
+    h3 { margin-top: 25px; color: #6a3f8a;}
+    .sabor-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8f0fa;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 10px;
+    }
+    .sabor-item label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sabor-item img {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    .sabor-item input[type="number"] {
+      width: 70px;
+      padding: 5px;
+      border: none;
+      border-radius: 5px;
+      text-align: center;
+    }
+    form { display: flex; flex-direction: column; gap: 12px;}
+    input, textarea, button {
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      width: 100%;
+    }
+    button {
+      background: #6a3f8a;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover { background: #8a5fb8;}
+    .social { margin-top: 20px; text-align: center;}
+    .social a {
+      margin: 0 10px;
+      text-decoration: none;
+      font-weight: bold;
+      color: #6a3f8a;
+      transition: 0.3s;
+    }
+    .social a:hover { color: #3a2b2b;}
+    .pedido {
+      background: #fdf6ff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 10px;
+      margin: 10px 0;
+    }
+    .limpar { background: #d9534f; margin-top: 10px;}
+    .limpar:hover { background: #b52b27;}
+
+    /* Botão de login fixo */
+    #loginBtn {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      font-size: 1.1rem;
+      background: transparent;
+      color: #b6b6b6;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      border: none;
+      box-shadow: none;
+      opacity: 0.3;
+      transition: opacity 0.3s, color 0.3s;
+      z-index: 1000;
+    }
+    #loginBtn:hover {
+      opacity: 0.7;
+      color: #6a3f8a;
+      background: transparent;
+    }
+
+    /* Área administrativa */
+    #loginArea {
+      display: none;
+      max-width: 700px;
+      margin: 20px auto;
+      padding: 15px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .categoria {
+      margin-bottom: 20px;
+    }
+    .categoria h4 {
+      margin-bottom: 10px;
+      color: #6a3f8a;
+    }
+    .categoria ul {
+      list-style: none;
+      padding: 0;
+    }
+    .categoria ul li {
+      margin: 5px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .categoria img {
+      width: 30px;
+      height: 30px;
+      object-fit: cover;
+      border-radius: 5px;
+      margin-left: 10px;
+    }
+    .cardapio-edicao-box {
+      border: 2px solid #cbb6e3;
+      background: #f8f0fa;
+      border-radius: 10px;
+      padding: 8px 14px;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: fit-content;
+      font-size: 1.1em;
+    }
+    .cardapio-edicao-box .prefixo {
+      font-weight: bold;
+      color: #6a3f8a;
+    }
+    .cardapio-edicao-box input[type="number"] {
+      width: 90px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 3px 6px;
+      font-size: 1em;
+      margin-left: 0;
+      margin-right: 8px;
+    }
+    .cardapio-edicao-box button {
+      padding: 4px 10px;
+      font-size: 0.95em;
+      background: #6a3f8a;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .cardapio-edicao-box button:hover {
+      background: #8a5fb8;
+    }
+  </style>
+</head>
+<body>
+  <header>Anny Trufas</header>
+
+  <main>
+    <h2>Cardápio</h2>
+    <form id="pedidoForm">
+      <input type="text" id="nomeCliente" placeholder="Seu nome" required>
+      <div class="sabores" id="saboresContainer"></div>
+      <textarea id="endereco" placeholder="Digite o seu bairro" required></textarea>
+      <button type="submit">Enviar Pedido</button>
+    </form>
+    <div class="social">
+      <a href="https://wa.me/5584994567207" target="_blank">WhatsApp</a>
+      <a href="https://www.instagram.com/annytrufasdlc" target="_blank">Instagram</a>
+    </div>
+  </main>
+
+  <!-- Área administrativa -->
+  <div id="loginArea">
+    <h3>📋 Painel Administrativo</h3>
+    <div id="listaPedidos"></div>
+    <button class="limpar" onclick="limparPedidos()">🗑 Limpar Histórico</button>
+    <h3>✏️ Editar Cardápio</h3>
+    <select id="categoriaSelect">
+      <option value="Trufas">Trufas</option>
+      <option value="Bolos">Bolos</option>
+      <option value="Bolinho de Pote">Bolinho de Pote</option>
+      <option value="Brigadeiro">Brigadeiro</option>
+      <option value="Brownie">Brownie</option>
+    </select>
+    <input type="text" id="novoItem" placeholder="Novo item">
+    <input type="file" id="fotoItem" accept="image/*">
+    <button onclick="adicionarItem()">Adicionar Item</button>
+    <div id="listaCategorias"></div>
+  </div>
+
+  <!-- Botão de login fixo -->
+  <button id="loginBtn" onclick="fazerLogin()">⚙️</button>
+
+  <script>
+    let precoTrufa = 2.0;
+    let senhaDono = "530530";
+
+    // Carregar cardápio salvo ou usar padrão inicial
+    let cardapio = JSON.parse(localStorage.getItem("cardapio")) || {
+      "Trufas": [
+        {nome:"Brigadeiro", preco: 2.0},
+        {nome:"Limão", preco: 2.0},
+        {nome:"Maracujá", preco: 2.0},
+        {nome:"Morango", preco: 2.0},
+        {nome:"Amendoim", preco: 2.0}
+      ],
+      "Bolos": [],
+      "Bolinho de Pote": [],
+      "Brigadeiro": [],
+      "Brownie": []
+    };
+
+    function salvarCardapio() {
+      localStorage.setItem("cardapio", JSON.stringify(cardapio));
+    }
+
+    // Renderizar cardápio no formulário
+    function carregarCardapio() {
+      let container = document.getElementById("saboresContainer");
+      container.innerHTML = "";
+      for (let categoria in cardapio) {
+        if (cardapio[categoria].length > 0) {
+          container.innerHTML += `<h3>${categoria}</h3>`;
+          cardapio[categoria].forEach(item => {
+            container.innerHTML += `
+  <div class="sabor-item">
+    <label>
+      ${item.foto ? `<img src="${item.foto}" alt="${item.nome}">` : ""}
+      ${item.nome} <span style="color:#6a3f8a; font-size:0.95em;">R$ ${item.preco ? item.preco.toFixed(2) : '--'}</span>
+    </label>
+    <input type="number" min="0" placeholder="Qtd">
+  </div>`;
+          });
+        }
+      }
+      renderizarAdmin();
+    }
+
+    // Mostrar no painel admin
+    function renderizarAdmin() {
+      let area = document.getElementById("listaCategorias");
+      area.innerHTML = "";
+      for (let categoria in cardapio) {
+        let bloco = `<div class="categoria"><h4>${categoria}</h4>`;
+        cardapio[categoria].forEach((item, i) => {
+          bloco += `
+        <div class="cardapio-edicao-box">
+          <span>${item.nome}</span>
+          ${item.foto ? `<img src="${item.foto}" alt="foto" style="width:30px; height:30px; border-radius:5px; object-fit:cover;">` : ""}
+          <span class="prefixo">R$</span>
+          <input type="number" min="0" step="0.01" value="${item.preco !== undefined ? item.preco : ''}" 
+            onchange="this.nextElementSibling.disabled=false;">
+          <button disabled onclick="atualizarPreco('${categoria}', ${i}, this.previousElementSibling.value)">Salvar</button>
+          <button style="background:#d9534f; margin-left:8px;" onclick="removerItem('${categoria}', ${i})">❌</button>
+        </div>
+      `;
+        });
+        bloco += "</div>";
+        area.innerHTML += bloco;
+      }
+    }
+
+    // Converter imagem para base64
+    function getBase64(file, callback) {
+      let reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => callback(reader.result);
+    }
+
+    // Adicionar item com ou sem foto
+    function adicionarItem() {
+      let categoria = document.getElementById("categoriaSelect").value;
+      let novo = document.getElementById("novoItem").value.trim();
+      let file = document.getElementById("fotoItem").files[0];
+      if (novo) {
+        if (file) {
+          getBase64(file, (foto) => {
+            cardapio[categoria].push({nome: novo, foto});
+            salvarCardapio();
+            document.getElementById("novoItem").value = "";
+            document.getElementById("fotoItem").value = "";
+            carregarCardapio();
+          });
+        } else {
+          cardapio[categoria].push({nome: novo});
+          salvarCardapio();
+          document.getElementById("novoItem").value = "";
+          carregarCardapio();
+        }
+      }
+    }
+
+    function removerItem(categoria, i) {
+      cardapio[categoria].splice(i, 1);
+      salvarCardapio();
+      carregarCardapio();
+    }
+
+    function atualizarPreco(categoria, i, valor) {
+      cardapio[categoria][i].preco = parseFloat(valor);
+      salvarCardapio();
+      carregarCardapio();
+    }
+
+    // ----- LOGIN E PEDIDOS -----
+    function fazerLogin() {
+      let senha = prompt("Digite a senha:");
+      if (senha === senhaDono) {
+        document.getElementById("loginArea").style.display = "block";
+        mostrarPedidos();
+      } else {
+        alert("Senha incorreta!");
+      }
+    }
+
+    function limparPedidos() {
+      if (confirm("Tem certeza que deseja apagar todos os pedidos?")) {
+        localStorage.removeItem("pedidos");
+        localStorage.removeItem("ultimoNumeroPedido");
+        mostrarPedidos();
+      }
+    }
+
+    function mostrarPedidos() {
+      let pedidos = JSON.parse(localStorage.getItem("pedidos")) || [];
+      let lista = document.getElementById("listaPedidos");
+      lista.innerHTML = "";
+      pedidos.forEach((p, idx) => {
+        let div = document.createElement("div");
+        div.classList.add("pedido");
+        div.innerHTML = `
+          <strong>Pedido #${p.numeroPedido} - 👤 ${p.nome}</strong><br>
+          📦 ${p.sabores.join(", ")} <br>
+          📍 ${p.endereco} <br>
+          🚚 Frete a combinar <br>
+          <div class="valor-edicao-box">
+            <span>💵 Total (sem frete):</span>
+            <span class="prefixo">R$</span>
+            <input type="number" min="0" step="0.01" value="${p.total.toFixed(2)}"
+              oninput="document.getElementById('previewValor${idx}').innerText = (parseFloat(this.value || 0).toFixed(2))">
+            <span id="previewValor${idx}" style="font-weight:bold; color:#6a3f8a;">${p.total.toFixed(2)}</span>
+            <button onclick="atualizarValorPedido(${idx}, this.previousElementSibling.previousElementSibling.value)">Salvar</button>
+          </div>
+          🕒 ${p.data}`;
+        lista.appendChild(div);
+      });
+    }
+
+    function atualizarValorPedido(idx, novoValor) {
+      let pedidos = JSON.parse(localStorage.getItem("pedidos")) || [];
+      pedidos[idx].total = parseFloat(novoValor);
+      localStorage.setItem("pedidos", JSON.stringify(pedidos));
+      mostrarPedidos();
+    }
+
+    document.getElementById("pedidoForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      let nome = document.getElementById("nomeCliente").value;
+      let endereco = document.getElementById("endereco").value;
+      let saboresSelecionados = [];
+      let valorProdutos = 0;
+
+      document.querySelectorAll(".sabor-item").forEach((item) => {
+        let label = item.querySelector("label");
+        // Pegue apenas o nome do sabor (primeiro nó de texto do label)
+        let nomeSabor = label.childNodes[0].nodeType === 3
+          ? label.childNodes[0].textContent.trim()
+          : label.childNodes[1].textContent.trim();
+        let qtd = parseInt(item.querySelector("input[type=number]").value) || 0;
+
+        // Busca o preço do item no cardápio
+        let preco = 0;
+        for (let categoria in cardapio) {
+          let found = cardapio[categoria].find(s => s.nome === nomeSabor);
+          if (found && found.preco) { preco = found.preco; break; }
+        }
+        if (qtd > 0) {
+          let totalSabor = preco * qtd;
+          saboresSelecionados.push(`${nomeSabor} (R$ ${preco.toFixed(2)} x ${qtd} = R$ ${totalSabor.toFixed(2)})`);
+          valorProdutos += totalSabor;
+        }
+      });
+
+      if (saboresSelecionados.length === 0) {
+        alert("Selecione pelo menos um sabor e quantidade!");
+        return;
+      }
+
+      // Numeração automática do pedido
+      let ultimoNumero = parseInt(localStorage.getItem("ultimoNumeroPedido") || "0");
+      let numeroPedido = ultimoNumero + 1;
+      localStorage.setItem("ultimoNumeroPedido", numeroPedido);
+
+      // Mensagem para WhatsApp e registro do pedido
+      let mensagem = `🍫 Novo Pedido #${numeroPedido} 🍫\n\n👤 Nome: ${nome}\n📦 Sabores:\n• ${saboresSelecionados.join("\n• ")}\n📍 Endereço: ${endereco}\n\n💰 Produtos: R$ ${valorProdutos.toFixed(2)}\n💵 Total: R$ ${valorProdutos.toFixed(2)}\n\n*Frete a combinar*`;
+      let pedido = {
+        numeroPedido,
+        nome,
+        sabores: saboresSelecionados,
+        endereco,
+        taxaEntrega: 0,
+        total: valorProdutos,
+        data: new Date().toLocaleString()
+      };
+      let pedidos = JSON.parse(localStorage.getItem("pedidos")) || [];
+      pedidos.push(pedido);
+      localStorage.setItem("pedidos", JSON.stringify(pedidos));
+      mostrarPedidos();
+      let telefone = "5584994567207";
+      let urlWpp = `https://wa.me/${telefone}?text=${encodeURIComponent(mensagem)}`;
+      window.open(urlWpp, "_blank");
+    });
+
+    carregarCardapio();
+  </script>
+</body>
+</html>
+
+
